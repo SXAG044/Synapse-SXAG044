@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About Us - Verdictium</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background: linear-gradient(135deg,#000,#111);
+  color:white;
+}
+
+/* HEADER */
+.header{
+  text-align:center;
+  padding:20px;
+  font-size:28px;
+  font-weight:bold;
+}
+
+/* CONTAINER */
+.container{
+  max-width:900px;
+  margin:40px auto;
+  padding:30px;
+  background: rgba(255,255,255,0.05);
+  border-radius:20px;
+  backdrop-filter: blur(20px);
+  box-shadow:0 0 30px rgba(255,140,0,0.2);
+  line-height:1.8;
+}
+
+/* TEAM SECTION */
+.team{
+  margin-top:30px;
+  padding:20px;
+  background: rgba(255,255,255,0.05);
+  border-radius:15px;
+}
+
+.member{
+  margin:8px 0;
+}
+
+/* BUTTON */
+.back{
+  margin-top:20px;
+  padding:10px 20px;
+  background:orange;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+footer{
+  margin-top:50px;
+  padding:20px;
+  text-align:center;
+  background:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">About Wordify</div>
+
+<div class="container">
+
+<h2>About the Project</h2>
+
+<p>
+Wordify is an AI-powered legal document assistant designed to simplify complex legal language into clear, understandable insights. 
+It enables users to analyze contracts, detect risks, identify loopholes, and generate summaries efficiently.
+</p>
+
+<p>
+The platform integrates AI capabilities to provide features like clause detection, risk scoring, future impact simulation, 
+and legal interpretation, helping users make informed decisions quickly.
+</p>
+
+<h2>Our Vision</h2>
+
+<p>
+Our goal is to make legal systems more transparent, accessible, and user-friendly by leveraging artificial intelligence 
+to bridge the gap between legal complexity and common understanding.
+</p>
+
+<div class="team">
+  <h2>Team Synapse</h2>
+  <p>We are a team of innovators from <b>RNS Institute of Technology (RNSIT)</b>, building solutions for real-world problems.</p>
+
+  <div class="member">👤 Shubham Rathore</div>
+  <div class="member">👤 Niranjan</div>
+  <div class="member">👤 Kavin Kaverappa T</div>
+  <div class="member">👤 Krishna KH</div>
+</div>
+
+<button class="back" onclick="goBack()">← Back to Dashboard</button>
+
+</div>
+
+<footer>
+    © 2026 Verdictium 
+| Built by Team Synapse |
+</footer>
+
+<script>
+function goBack(){
+  window.location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>

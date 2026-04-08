@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordDeck™ Login</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    font-family: 'Segoe UI', sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+
+    /* CLEAN GOVT BLACK */
+    background:linear-gradient(135deg,#0a0a0a,#111,#000);
+}
+
+/* SUBTLE WHITE LIGHT */
+body::before{
+    content:'';
+    position:absolute;
+    width:400px;
+    height:400px;
+    background:radial-gradient(circle,#ffffff22,transparent);
+    top:20%;
+    left:30%;
+    filter:blur(120px);
+    animation:moveGlow 10s infinite alternate;
+}
+
+@keyframes moveGlow{
+    from{transform:translate(-40px,-40px);}
+    to{transform:translate(40px,40px);}
+}
+
+/* BUBBLES */
+.bubbles span{
+    position:absolute;
+    bottom:-50px;
+    width:14px;
+    height:14px;
+    background:rgba(255,255,255,0.06);
+    border-radius:50%;
+    animation:rise 12s linear infinite;
+}
+
+.bubbles span:nth-child(1){left:10%; animation-duration:8s;}
+.bubbles span:nth-child(2){left:25%; animation-duration:11s;}
+.bubbles span:nth-child(3){left:40%; animation-duration:10s;}
+.bubbles span:nth-child(4){left:60%; animation-duration:14s;}
+.bubbles span:nth-child(5){left:75%; animation-duration:9s;}
+.bubbles span:nth-child(6){left:85%; animation-duration:12s;}
+
+@keyframes rise{
+    0%{transform:translateY(0) scale(0.5); opacity:0;}
+    50%{opacity:0.25;}
+    100%{transform:translateY(-110vh) scale(1); opacity:0;}
+}
+
+/* CONTAINER */
+.container{
+    text-align:center;
+    color:white;
+    z-index:2;
+}
+
+/* TITLE */
+h1{
+    font-size:32px;
+    margin-bottom:10px;
+}
+
+/* SUBTITLE */
+.subtitle{
+    color:#aaa;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+/* CARD */
+.card{
+    width:320px;
+    padding:30px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 0 30px rgba(0,0,0,0.8);
+    animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+/* AVATAR */
+.avatar{
+    width:60px;
+    height:60px;
+    margin:auto;
+    border-radius:50%;
+    background:#222;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    margin-bottom:20px;
+}
+
+/* INPUT */
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:none;
+    border-radius:6px;
+    background:rgba(255,255,255,0.08);
+    color:white;
+}
+
+/* CAPTCHA BOX */
+.captcha-box{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+}
+
+.captcha-text{
+    background:#111;
+    padding:8px 12px;
+    border-radius:6px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:6px;
+    background:#ffffff;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+/* LINK */
+.link{
+    margin-top:12px;
+    font-size:13px;
+    color:#aaa;
+    cursor:pointer;
+}
+
+.link:hover{
+    color:#fff;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BUBBLES -->
+<div class="bubbles">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+</div>
+
+<div class="container">
+    <h1>WordDeck™</h1>
+    <div class="subtitle">AI Legal Document Action Agent</div>
+
+    <div class="card">
+        <div class="avatar">👤</div>
+
+        <!-- LOGIN -->
+        <div id="loginForm">
+            <input type="text" placeholder="Username">
+            <input type="password" placeholder="Password">
+            <button onclick="login()">Sign In</button>
+            <div class="link" onclick="toggleForm()">Create Account</div>
+        </div>
+
+        <!-- CREATE ACCOUNT -->
+        <div id="createForm" style="display:none;">
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+
+            <div class="captcha-box">
+                <div class="captcha-text" id="captcha"></div>
+                <button style="width:auto;padding:8px;" onclick="generateCaptcha()">↻</button>
+            </div>
+
+            <input type="text" id="captchaInput" placeholder="Enter CAPTCHA">
+
+            <button onclick="validateCaptcha()">Create Account</button>
+            <div class="link" onclick="toggleForm()">Back to Sign In</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let currentCaptcha = "";
+
+function generateCaptcha(){
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    currentCaptcha = "";
+    for(let i=0;i<5;i++){
+        currentCaptcha += chars.charAt(Math.floor(Math.random()*chars.length));
+    }
+    document.getElementById("captcha").innerText = currentCaptcha;
+}
+
+function validateCaptcha(){
+    let input = document.getElementById("captchaInput").value;
+    if(input === currentCaptcha){
+        alert("Account Created Successfully!");
+        login();
+    } else {
+        alert("Wrong CAPTCHA");
+        generateCaptcha();
+    }
+}
+
+function login(){
+    window.location.href="dashboard.html";
+}
+
+function toggleForm(){
+    let login = document.getElementById("loginForm");
+    let create = document.getElementById("createForm");
+
+    if(login.style.display === "none"){
+        login.style.display = "block";
+        create.style.display = "none";
+    } else {
+        login.style.display = "none";
+        create.style.display = "block";
+        generateCaptcha();
+    }
+}
+</script>
+
+</body>
+</html>

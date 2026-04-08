@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terms & Conditions - Wordify</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background: linear-gradient(135deg,#000,#111);
+  color:white;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:15px 25px;
+}
+
+.title{
+  font-size:26px;
+  font-weight:bold;
+}
+
+/* CONTAINER (SAME AS ABOUT) */
+.container{
+  max-width:900px;
+  margin:50px auto;
+  padding:30px;
+  background: rgba(255,255,255,0.05);
+  border-radius:20px;
+  backdrop-filter: blur(20px);
+  box-shadow:0 0 30px rgba(255,140,0,0.2);
+  line-height:1.8;
+}
+
+/* BUTTON (SAME STYLE) */
+.back{
+  margin-top:20px;
+  padding:10px 20px;
+  background:orange;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* FOOTER */
+footer{
+  margin-top:50px;
+  padding:20px;
+  text-align:center;
+  background:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="title">Wordify - Terms & Conditions</div>
+</div>
+
+<div class="container">
+
+  <h2>Terms & Conditions</h2>
+
+  <p>
+  By accessing and using Wordify, you agree to comply with these terms and conditions. 
+  This platform is designed to provide AI-powered legal insights for informational purposes only.
+  </p>
+
+  <p>
+  Wordify does not provide official legal advice. Users are responsible for verifying all outputs before making decisions.
+  </p>
+
+  <p>
+  All documents uploaded must be lawful and owned or authorized by the user. 
+  We ensure secure processing and do not misuse user data.
+  </p>
+
+  <p>
+  While our AI strives for accuracy, results may not always be complete or correct. 
+  Users are encouraged to consult legal professionals when necessary.
+  </p>
+
+  <p>
+  Team Synapse retains all intellectual property rights related to the platform design and technology.
+  </p>
+
+  <p>
+  Wordify shall not be held liable for any loss or damage resulting from the use of this platform.
+  </p>
+
+  <p>
+  We reserve the right to update these terms at any time. Continued use of the platform indicates acceptance of updated terms.
+  </p>
+
+  <button class="back" onclick="goBack()">← Back to Dashboard</button>
+
+</div>
+
+<footer>
+  © 2026 Wordify | AI Legal Platform
+</footer>
+
+<script>
+function goBack(){
+  window.location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>
