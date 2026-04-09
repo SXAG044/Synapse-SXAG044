@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdictium Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="shell" style="padding:20px;">
+  <div class="header">
+    <div class="brand">
+      <h1>Verdictium</h1>
+      <p>AI Legal Document Action Agent</p>
+    </div>
+
+    <div class="row">
+      <div class="small">👤 <span id="usernameDisplay"></span></div>
+      <a class="btn btn-secondary" href="about.html">About</a>
+      <a class="btn btn-secondary" href="terms.html">Terms</a>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2 style="margin-bottom:16px;">Upload Legal Document</h2>
+
+      <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.txt">
+
+      <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title" id="uploadTitle">Click to upload document</div>
+        <div class="upload-sub">Supported formats: PDF, DOCX, TXT</div>
+      </div>
+
+      <div class="form" style="margin-top:16px;">
+        <div>
+          <label for="lang">Output Language</label>
+          <select id="lang">
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+            <option value="kannada">Kannada</option>
+            <option value="tamil">Tamil</option>
+            <option value="malayalam">Malayalam</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="analyze()">Analyze Document</button>
+        <button class="btn btn-secondary" onclick="resetSelection()">Clear Selection</button>
+        <div id="dashStatus" class="status"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom:16px;">What You’ll Get</h2>
+      <div class="item-list">
+        <div class="item">
+          <h4>Summary + Keywords</h4>
+          <p>Clear explanation of the document and its key terms.</p>
+        </div>
+        <div class="item">
+          <h4>Loopholes + Legal References</h4>
+          <p>Spot weak areas, clauses, and cited provisions.</p>
+        </div>
+        <div class="item">
+          <h4>Chat + Decision Risk</h4>
+          <p>Ask follow-up questions and simulate consequences of your next step.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+const user = requireUser();
+if(user){
+  document.getElementById("usernameDisplay").textContent = user.username;
+}
+
+let selectedFile = null;
+
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  selectedFile = e.target.files[0];
+  if(selectedFile){
+    document.getElementById("uploadTitle").textContent = selectedFile.name;
+    setStatus("dashStatus", `Selected: ${selectedFile.name}`, "success");
+  }
+});
+
+function resetSelection(){
+  selectedFile = null;
+  document.getElementById("fileInput").value = "";
+  document.getElementById("uploadTitle").textContent = "Click to upload document";
+  clearStatus("dashStatus");
+}
+
+async function analyze(){
+  const language = document.getElementById("lang").value;
+
+  if(!selectedFile){
+    setStatus("dashStatus", "Please select a file first.", "error");
+    return;
+  }
+
+  try{
+    setStatus("dashStatus", "Uploading document...", "loading");
+    const uploadData = await uploadDocument(selectedFile, language);
+
+    setStatus("dashStatus", "Running AI analysis...", "loading");
+    const analysisData = await analyzeDocument(uploadData.document_id, language);
+
+    const enriched = {
+      ...analysisData,
+      document_id: uploadData.document_id,
+      filename: selectedFile.name,
+      language,
+      upload_preview: uploadData.extracted_text_preview || ""
+    };
+
+    localStorage.setItem("analysis", JSON.stringify(enriched));
+    localStorage.removeItem("chatSessionId");
+
+    setStatus("dashStatus", "Analysis complete. Opening results...", "success");
+
+    setTimeout(() => {
+      go("result.html");
+    }, 600);
+  }catch(err){
+    setStatus("dashStatus", err.message || "Something went wrong.", "error");
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdictium Results</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="shell" style="padding:20px;">
+  <div class="header">
+    <div class="brand">
+      <h1>Verdictium</h1>
+      <p>Analysis Result Workspace</p>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-secondary" onclick="go('dashboard.html')">Back</button>
+      <button class="btn btn-secondary" onclick="window.print()">Print</button>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="grid-main">
+    <div class="stack">
+      <div class="card">
+        <h2 style="margin-bottom:14px;">Document Overview</h2>
+        <div class="meta-grid">
+          <div class="meta"><span class="label">Filename</span><span class="value" id="fileName">—</span></div>
+          <div class="meta"><span class="label">Document Type</span><span class="value" id="documentType">—</span></div>
+          <div class="meta"><span class="label">Language</span><span class="value" id="languageValue">—</span></div>
+          <div class="meta"><span class="label">Document ID</span><span class="value" id="documentId">—</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:14px;">Summary</h2>
+        <div class="summary" id="summaryText"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:14px;">Keywords</h2>
+        <div class="badges" id="keywordsWrap"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:14px;">Loopholes</h2>
+        <div class="item-list" id="loopholesList"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 style="margin-bottom:14px;">Parties</h2>
+          <div class="item-list" id="partiesList"></div>
+        </div>
+        <div class="card">
+          <h2 style="margin-bottom:14px;">Obligations</h2>
+          <div class="item-list" id="obligationsList"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 style="margin-bottom:14px;">Legal Provisions</h2>
+          <div class="item-list" id="legalList"></div>
+        </div>
+        <div class="card">
+          <h2 style="margin-bottom:14px;">Clause References</h2>
+          <div class="item-list" id="clausesList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <h2 style="margin-bottom:14px;">AI Legal Assistant</h2>
+        <div class="chat-box">
+          <div class="chat-messages" id="chatMessages">
+            <div class="msg assistant">Ask anything about this analyzed document.</div>
+          </div>
+          <textarea id="chatInput" placeholder="Ask a question about the document..."></textarea>
+          <button class="btn btn-primary" onclick="handleChat()">Send Question</button>
+          <div id="chatStatus" class="status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:14px;">Decision Risk Analysis</h2>
+        <div class="score-wrap" style="margin-bottom:14px;">
+          <div class="score-circle" id="scoreCircle">—</div>
+          <div>
+            <div style="font-size:22px;font-weight:800;" id="scoreText">No score yet</div>
+            <div class="small" id="scoreLevel">Enter a decision below</div>
+          </div>
+        </div>
+
+        <div class="form">
+          <textarea id="decisionInput" placeholder="Example: I want to sign this agreement without changes."></textarea>
+          <button class="btn btn-primary" onclick="handleRisk()">Run Risk Analysis</button>
+          <div id="riskStatus" class="status"></div>
+        </div>
+
+        <div class="stack" style="margin-top:18px;">
+          <div class="card">
+            <h3 style="margin-bottom:12px;">Possible Consequences</h3>
+            <div class="item-list" id="consequencesList"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:12px;">Risk Reasons</h3>
+            <div class="item-list" id="riskReasonsList"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:12px;">Recommended Next Steps</h3>
+            <div class="item-list" id="nextStepsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+requireUser();
+
+const analysis = safeJsonParse(localStorage.getItem("analysis"), null);
+let chatSessionId = safeJsonParse(localStorage.getItem("chatSessionId"), null);
+
+if(!analysis){
+  go("dashboard.html");
+}
+
+function safeArray(v){
+  return Array.isArray(v) ? v : [];
+}
+
+function renderText(id, text, fallback = "—"){
+  const el = document.getElementById(id);
+  if(el) el.textContent = text || fallback;
+}
+
+function renderBadges(items, id){
+  const wrap = document.getElementById(id);
+  if(!items.length){
+    wrap.innerHTML = `<div class="small">No keywords found.</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(item => `<span class="badge">${escapeHtml(item)}</span>`).join("");
+}
+
+function renderSimpleItems(items, id, emptyText){
+  const wrap = document.getElementById(id);
+  if(!items.length){
+    wrap.innerHTML = `<div class="small">${escapeHtml(emptyText)}</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(item => `
+    <div class="item"><p>${escapeHtml(item)}</p></div>
+  `).join("");
+}
+
+function renderLoopholes(items){
+  const wrap = document.getElementById("loopholesList");
+  if(!items.length){
+    wrap.innerHTML = `<div class="small">No loopholes returned.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = items.map(item => `
+    <div class="item">
+      <span class="severity ${escapeHtml((item.severity || "low").toLowerCase())}">
+        ${escapeHtml(item.severity || "low")}
+      </span>
+      <h4>${escapeHtml(item.title || "Untitled")}</h4>
+      <p>${escapeHtml(item.explanation || "No explanation provided.")}</p>
+      <small><strong>Suggestion:</strong> ${escapeHtml(item.suggestion || "No suggestion provided.")}</small>
+    </div>
+  `).join("");
+}
+
+function renderRefs(items, id, emptyText, useLegal = true){
+  const wrap = document.getElementById(id);
+  if(!items.length){
+    wrap.innerHTML = `<div class="small">${escapeHtml(emptyText)}</div>`;
+    return;
+  }
+
+  wrap.innerHTML = items.map(item => `
+    <div class="item">
+      <h4>${escapeHtml(useLegal ? (item.law_name || "Reference") : (item.clause_name || "Clause"))}</h4>
+      <p>${escapeHtml(useLegal ? (item.section_or_clause || "No section given") : (item.clause_reference || "No clause reference"))}</p>
+      <small>${escapeHtml(item.explanation || "No explanation provided.")}</small>
+    </div>
+  `).join("");
+}
+
+function addMessage(role, text){
+  const box = document.getElementById("chatMessages");
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function ensureChatSession(){
+  if(chatSessionId) return chatSessionId;
+
+  const data = await startChat(analysis.document_id, analysis.language || "english");
+  chatSessionId = data.session_id;
+  localStorage.setItem("chatSessionId", JSON.stringify(chatSessionId));
+  return chatSessionId;
+}
+
+async function handleChat(){
+  const question = document.getElementById("chatInput").value.trim();
+  if(!question){
+    setStatus("chatStatus", "Please type a question first.", "error");
+    return;
+  }
+
+  try{
+    setStatus("chatStatus", "Thinking...", "loading");
+    addMessage("user", question);
+    document.getElementById("chatInput").value = "";
+
+    const sessionId = await ensureChatSession();
+    const data = await sendChatMessage(sessionId, question, analysis.language || "english");
+
+    addMessage("assistant", data.answer || "No answer returned.");
+    setStatus("chatStatus", "Answer received.", "success");
+  }catch(err){
+    setStatus("chatStatus", err.message || "Chat failed.", "error");
+  }
+}
+
+function renderRiskItems(items, id, emptyText){
+  const wrap = document.getElementById(id);
+  if(!items.length){
+    wrap.innerHTML = `<div class="small">${escapeHtml(emptyText)}</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map(item => `<div class="item"><p>${escapeHtml(item)}</p></div>`).join("");
+}
+
+function setRiskVisual(score, level){
+  document.getElementById("scoreCircle").textContent = score;
+  document.getElementById("scoreText").textContent = `Risk Score: ${score}/100`;
+  document.getElementById("scoreLevel").textContent = `Level: ${level}`;
+
+  const circle = document.getElementById("scoreCircle");
+  if(level === "critical"){
+    circle.style.color = "#ffb4b4";
+    circle.style.borderColor = "rgba(255,107,107,0.35)";
+  }else if(level === "high"){
+    circle.style.color = "#ffcc80";
+    circle.style.borderColor = "rgba(255,152,0,0.35)";
+  }else if(level === "medium"){
+    circle.style.color = "#fde68a";
+    circle.style.borderColor = "rgba(250,204,21,0.35)";
+  }else{
+    circle.style.color = "#86efac";
+    circle.style.borderColor = "rgba(74,222,128,0.35)";
+  }
+}
+
+async function handleRisk(){
+  const decision = document.getElementById("decisionInput").value.trim();
+  if(!decision){
+    setStatus("riskStatus", "Please enter your decision first.", "error");
+    return;
+  }
+
+  try{
+    setStatus("riskStatus", "Running decision risk analysis...", "loading");
+    const data = await runDecisionRisk(analysis.document_id, analysis.language || "english", decision);
+
+    setRiskVisual(data.final_risk_score ?? 0, data.risk_level || "low");
+    renderRiskItems(safeArray(data.possible_consequences), "consequencesList", "No consequences returned.");
+    renderRiskItems(safeArray(data.risk_reasons), "riskReasonsList", "No reasons returned.");
+    renderRiskItems(safeArray(data.recommended_next_steps), "nextStepsList", "No next steps returned.");
+
+    setStatus("riskStatus", "Risk analysis completed.", "success");
+  }catch(err){
+    setStatus("riskStatus", err.message || "Risk analysis failed.", "error");
+  }
+}
+
+function renderAnalysis(){
+  renderText("fileName", analysis.filename || "—");
+  renderText("documentType", analysis.document_type || "UNKNOWN");
+  renderText("languageValue", analysis.language || "english");
+  renderText("documentId", String(analysis.document_id || "—"));
+  renderText("summaryText", analysis.summary || "No summary returned.");
+
+  renderBadges(safeArray(analysis.keywords), "keywordsWrap");
+  renderLoopholes(safeArray(analysis.loopholes));
+  renderSimpleItems(safeArray(analysis.parties), "partiesList", "No parties identified.");
+  renderSimpleItems(safeArray(analysis.obligations), "obligationsList", "No obligations identified.");
+  renderRefs(safeArray(analysis.legal_provisions), "legalList", "No legal provisions returned.", true);
+  renderRefs(safeArray(analysis.clause_references), "clausesList", "No clause references returned.", false);
+}
+
+renderAnalysis();
+</script>
+</body>
+</html>

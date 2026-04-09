@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdictium Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+  <div class="shell hero">
+    <div class="card hero-copy">
+      <div class="brand">
+        <h1>Verdictium</h1>
+        <p>
+          AI Legal Document Action Agent. Upload legal documents, get summaries, keywords, loopholes,
+          legal references, a chatbot for clarifications, and decision-based risk analysis.
+        </p>
+      </div>
+
+      <div class="feature-list">
+        <div class="feature">
+          <h4>Summary</h4>
+          <p>Understand long legal documents quickly.</p>
+        </div>
+        <div class="feature">
+          <h4>Loopholes</h4>
+          <p>Spot risky clauses and missing protections.</p>
+        </div>
+        <div class="feature">
+          <h4>Chat Assistant</h4>
+          <p>Ask follow-up questions about the document.</p>
+        </div>
+        <div class="feature">
+          <h4>Risk Engine</h4>
+          <p>See likely consequences before making a move.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="center" style="margin-bottom:20px;">
+        <h2 style="margin-bottom:8px;">Welcome Back</h2>
+        <p class="small">Sign in to continue to your workspace.</p>
+      </div>
+
+      <div class="form">
+        <div>
+          <label for="username">Username</label>
+          <input id="username" type="text" placeholder="Enter your username">
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Enter your password">
+        </div>
+
+        <button class="btn btn-primary" onclick="login()">Sign In</button>
+        <div id="loginStatus" class="status"></div>
+      </div>
+
+      <div class="row" style="margin-top:18px; justify-content:center;">
+        <a class="btn btn-secondary" href="about.html">About</a>
+        <a class="btn btn-secondary" href="terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+function login(){
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if(!username || !password){
+    setStatus("loginStatus", "Enter username and password.", "error");
+    return;
+  }
+
+  localStorage.setItem("user", JSON.stringify({ username }));
+  setStatus("loginStatus", "Login successful. Redirecting...", "success");
+
+  setTimeout(() => {
+    go("dashboard.html");
+  }, 500);
+}
+</script>
+</body>
+</html>
